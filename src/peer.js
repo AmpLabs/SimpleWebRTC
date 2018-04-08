@@ -24,6 +24,7 @@ function Peer(options) {
 
     this.id = options.id;
     this.parent = options.parent;
+
     this.type = options.type || 'video';
     this.oneway = options.oneway || false;
     this.sharemyscreen = options.sharemyscreen || false;
@@ -102,6 +103,7 @@ function Peer(options) {
     this.on('*', function () {
         self.parent.emit.apply(self.parent, arguments);
     });
+
 }
 
 util.inherits(Peer, WildEmitter);
@@ -110,14 +112,15 @@ Peer.prototype.handleMessage = function (message) {
     var self = this;
 
     this.logger.log('getting', message.type, message);
-
     if (message.prefix) this.browserPrefix = message.prefix;
 
     if (message.type === 'offer') {
         if (!this.nick) this.nick = message.payload.nick;
         delete message.payload.nick;
+ 
         this.pc.handleOffer(message.payload, function (err) {
             if (err) {
+                console.log('handle offer error', err);
                 return;
             }
             // auto-accept
@@ -129,6 +132,7 @@ Peer.prototype.handleMessage = function (message) {
         if (!this.nick) this.nick = message.payload.nick;
         delete message.payload.nick;
         this.pc.handleAnswer(message.payload);
+
     } else if (message.type === 'candidate') {
         this.pc.processIce(message.payload);
     } else if (message.type === 'connectivityError') {
@@ -138,8 +142,16 @@ Peer.prototype.handleMessage = function (message) {
     } else if (message.type === 'unmute') {
         this.parent.emit('unmute', {id: message.from, name: message.payload.name});
     } else if (message.type === 'endOfCandidates') {
-        this.pc.pc.addIceCandidate(undefined);
+        // Edge requires an end-of-candidates. Since only Edge will have mLines or tracks on the
+        // shim this will only be called in Edge.
+        var mLines = this.pc.pc.transceivers || [];
+        mLines.forEach(function (mLine) {
+            if (mLine.iceTransport) {
+                mLine.iceTransport.addRemoteCandidate({});
+            }
+        });
     }
+
 };
 
 // send via signalling channel
@@ -154,7 +166,10 @@ Peer.prototype.send = function (messageType, payload) {
         prefix: webrtcSupport.prefix
     };
     this.logger.log('sending', messageType, message);
-    this.parent.emit('message', message);
+    //if (messageType ==='offer' || messageType === 'answer'){
+      this.parent.emit('message', message);
+    //}
+    
 };
 
 // send via data channel
@@ -212,7 +227,7 @@ Peer.prototype.onIceCandidate = function (candidate) {
 
 Peer.prototype.start = function () {
     var self = this;
-
+    console.log('peer start');
     // well, the webrtc api requires that we either
     // a) create a datachannel a priori
     // b) do a renegotiation later to add the SCTP m-line

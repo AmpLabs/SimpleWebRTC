@@ -131,6 +131,8 @@ WebRTC.prototype.removePeers = function (id, type) {
 
 // fetches all Peer objects by session id and/or type
 WebRTC.prototype.getPeers = function (sessionId, type) {
+    console.log('this.peers in getPeers:', this.peers);
+    
     return this.peers.filter(function (peer) {
         return (!sessionId || peer.id === sessionId) && (!type || peer.type === type);
     });
