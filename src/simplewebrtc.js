@@ -300,9 +300,16 @@ SimpleWebRTC.prototype = Object.create(WildEmitter.prototype, {
     }
 });
 
+
 SimpleWebRTC.prototype.leaveRoom = function () {
+
     if (this.roomName) {
-        this.connection.emit('leave');
+        if (this.connection){
+          this.connection.emit('leave'); }
+        else (this.phx_channel){
+          this.phx_channel.leave();
+        }
+        
         while (this.webrtc.peers.length) {
             this.webrtc.peers[0].end();
         }
@@ -367,11 +374,12 @@ SimpleWebRTC.prototype.setVolumeForAll = function (volume) {
 };
 
 
-SimpleWebRTC.prototype.joinPhxChannel = function (name) {
+SimpleWebRTC.prototype.joinPhxChannel = function (name, cb) {
   var self = this;
- 
+  var members;
   var phx_channel = self.phx_socket.channel(name, {});
   self.phx_channel = phx_channel;
+  self.roomName = name;
 
   var onMessage = function (message) {
   
@@ -436,7 +444,7 @@ SimpleWebRTC.prototype.joinPhxChannel = function (name) {
   .receive("ok", resp => { 
  
      var type = 'video';
-
+     members = resp.members; 
      for (let id in resp.members){
        let id_str =  id.toString();
        var peer = self.webrtc.createPeer({
@@ -451,6 +459,9 @@ SimpleWebRTC.prototype.joinPhxChannel = function (name) {
       self.emit('createdPeer', peer);
       peer.start();
      }
+     
+     if (cb) cb(err, members);
+
      self.emit('joinedRoom', name);
 
     })
