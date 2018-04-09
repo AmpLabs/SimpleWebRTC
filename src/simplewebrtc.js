@@ -418,7 +418,7 @@ SimpleWebRTC.prototype.joinPhxChannel = function (name) {
   if (phx_channel){
 
       phx_channel.on('stunservers', function (args) {
-          console.log('stunservers', args);
+          //console.log('stunservers', args);
           // resets/overrides the config
           self.webrtc.config.peerConnectionConfig.iceServers = args;
           self.emit('stunservers', args);
@@ -435,8 +435,6 @@ SimpleWebRTC.prototype.joinPhxChannel = function (name) {
   phx_channel.join()
   .receive("ok", resp => { 
  
-
-
      var type = 'video';
 
      for (let id in resp.members){
@@ -453,9 +451,12 @@ SimpleWebRTC.prototype.joinPhxChannel = function (name) {
       self.emit('createdPeer', peer);
       peer.start();
      }
-    })
-  .receive("error", resp => { console.log("Unable to join", resp); });
+     self.emit('joinedRoom', name);
 
+    })
+  .receive("error", resp => { 
+    self.emit('err', resp);
+    console.log("Unable to join", resp); });
 };
 
 SimpleWebRTC.prototype.joinRoom = function (name, cb) {
