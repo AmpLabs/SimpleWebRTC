@@ -194,23 +194,7 @@ function SimpleWebRTC(opts) {
         this.webrtc.on('speaking', this.setVolumeForAll.bind(this, this.config.peerVolumeWhenSpeaking));
         this.webrtc.on('stoppedSpeaking', this.setVolumeForAll.bind(this, 1));
     }
-    if (self.phx_channel){
-      self.phx_channel.on('stunservers', function (args) {
-          console.log('stunservers', args);
-          // resets/overrides the config
-          self.webrtc.config.peerConnectionConfig.iceServers = args;
-          self.emit('stunservers', args);
-      });
-
-      self.phx_channel.on('turnservers', function (args) {
-                  console.log('turnservers', args);
-
-          // appends to the config
-          self.webrtc.config.peerConnectionConfig.iceServers = self.webrtc.config.peerConnectionConfig.iceServers.concat(args);
-          self.emit('turnservers', args);
-      });
-    }
-
+    
     if (connection) {
       connection.on('stunservers', function (args) {
           console.log('stunservers', args);
@@ -428,12 +412,30 @@ SimpleWebRTC.prototype.joinPhxChannel = function (name) {
           }); 
       }
   };
-  
-   
+
+  phx_channel.on("message", onMessage); 
+
+  if (phx_channel){
+
+      phx_channel.on('stunservers', function (args) {
+          console.log('stunservers', args);
+          // resets/overrides the config
+          self.webrtc.config.peerConnectionConfig.iceServers = args;
+          self.emit('stunservers', args);
+      });
+
+      phx_channel.on('turnservers', function (args) {
+          console.log('turnservers', args);
+          // appends to the config
+          self.webrtc.config.peerConnectionConfig.iceServers = self.webrtc.config.peerConnectionConfig.iceServers.concat(args);
+          self.emit('turnservers', args);
+      });
+  }
+
   phx_channel.join()
   .receive("ok", resp => { 
  
-     phx_channel.on("message", onMessage); 
+
 
      var type = 'video';
 
