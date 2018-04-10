@@ -306,7 +306,9 @@ SimpleWebRTC.prototype.leaveRoom = function () {
     if (this.roomName) {
         if (this.connection){
           this.connection.emit('leave'); 
-        } else if (this.phx_channel){
+        } 
+
+        if(this.phx_channel) {
           this.phx_channel.leave();
         }
         
