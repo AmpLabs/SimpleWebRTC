@@ -305,8 +305,8 @@ SimpleWebRTC.prototype.leaveRoom = function () {
 
     if (this.roomName) {
         if (this.connection){
-          this.connection.emit('leave'); }
-        else (this.phx_channel){
+          this.connection.emit('leave'); 
+        } else if (this.phx_channel){
           this.phx_channel.leave();
         }
         
@@ -377,6 +377,7 @@ SimpleWebRTC.prototype.setVolumeForAll = function (volume) {
 SimpleWebRTC.prototype.joinPhxChannel = function (name, cb) {
   var self = this;
   var members;
+  var err;
   var phx_channel = self.phx_socket.channel(name, {});
   self.phx_channel = phx_channel;
   self.roomName = name;
@@ -442,7 +443,6 @@ SimpleWebRTC.prototype.joinPhxChannel = function (name, cb) {
 
   phx_channel.join()
   .receive("ok", resp => { 
- 
      var type = 'video';
      members = resp.members; 
      for (let id in resp.members){
@@ -459,15 +459,15 @@ SimpleWebRTC.prototype.joinPhxChannel = function (name, cb) {
       self.emit('createdPeer', peer);
       peer.start();
      }
-     
-     if (cb) cb(err, members);
 
+     if (cb) cb(null, members);
      self.emit('joinedRoom', name);
 
     })
   .receive("error", resp => { 
-    self.emit('err', resp);
-    console.log("Unable to join", resp); });
+    //console.log('error connecting to room', resp);
+    if (cb) cb('Unable to join', members);
+    self.emit('err', resp); });
 };
 
 SimpleWebRTC.prototype.joinRoom = function (name, cb) {
