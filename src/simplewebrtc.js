@@ -429,7 +429,7 @@ SimpleWebRTC.prototype.joinPhxChannel = function (name, cb) {
   if (phx_channel){
 
       phx_channel.on('stunservers', function (args) {
-          //console.log('stunservers', args);
+          console.log('stunservers', args);
           // resets/overrides the config
           self.webrtc.config.peerConnectionConfig.iceServers = args;
           self.emit('stunservers', args);
