@@ -429,17 +429,17 @@ SimpleWebRTC.prototype.joinPhxChannel = function (name, cb) {
   if (phx_channel){
       
       phx_channel.on('stunservers', function (args) {
-          console.log('stunservers', args.ice_servers);
+          //console.log('stunservers', args.ice_servers);
           // resets/overrides the config
-          self.webrtc.config.peerConnectionConfig.iceServers = args;
-          self.emit('stunservers', args);
+          self.webrtc.config.peerConnectionConfig.iceServers = args.ice_servers;
+          self.emit('stunservers', args.ice_servers);
       });
 
       phx_channel.on('turnservers', function (args) {
-          console.log('turnservers', args);
+          //console.log('turnservers', args);
           // appends to the config
-          self.webrtc.config.peerConnectionConfig.iceServers = self.webrtc.config.peerConnectionConfig.iceServers.concat(args);
-          self.emit('turnservers', args);
+          self.webrtc.config.peerConnectionConfig.iceServers = self.webrtc.config.peerConnectionConfig.iceServers.concat(args.ice_servers);
+          self.emit('turnservers', args.ice_servers);
       });
   }
 
