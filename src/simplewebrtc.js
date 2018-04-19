@@ -444,7 +444,7 @@ SimpleWebRTC.prototype.joinPhxChannel = function (name, cb) {
   }
 
   phx_channel.join()
-  .receive("ok", resp => { 
+  .receive("ok", function (resp) { 
      var type = 'video';
      members = resp.members; 
      for (let id in resp.members){
