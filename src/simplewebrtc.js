@@ -23,7 +23,7 @@ function SimpleWebRTC(opts) {
             adjustPeerVolume: false,
             peerVolumeWhenSpeaking: 0.25,
             media: {
-                video: true,
+                video: false,
                 audio: true
             },
             receiveMedia: {
@@ -94,9 +94,6 @@ function SimpleWebRTC(opts) {
 
 
       connection.on('message', function (message) {
-          
-          console.log('connection message', message);
-
           var peers = self.webrtc.getPeers(message.from, message.roomType);
           var peer;
 
@@ -108,6 +105,7 @@ function SimpleWebRTC(opts) {
                   //if (!peer) peer = peers[0]; // fallback for old protocol versions
               }
               if (!peer) {
+                
                   peer = self.webrtc.createPeer({
                       id: message.from,
                       sid: message.sid,
@@ -466,7 +464,7 @@ SimpleWebRTC.prototype.joinPhxChannel = function (name, cb) {
      self.emit('joinedRoom', name);
 
     })
-  .receive("error", resp => { 
+  .receive("error", function(resp) { 
     //console.log('error connecting to room', resp);
     if (cb) cb('Unable to join', members);
     self.emit('err', resp); });
@@ -519,14 +517,12 @@ SimpleWebRTC.prototype.getEl = function (idOrEl) {
 
 SimpleWebRTC.prototype.startLocalVideo = function () {
     var self = this;
-    console.log('startLocalVideo:', self);
     
     this.webrtc.start(this.config.media, function (err, stream) {
         if (err) {
             console.log('err', err);
             self.emit('localMediaError', err);
         } else {
-            console.log('stream:', stream);
             attachMediaStream(stream, self.getLocalVideoContainer(), self.config.localVideo);
         }
     });
