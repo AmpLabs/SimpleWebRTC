@@ -444,6 +444,11 @@ SimpleWebRTC.prototype.joinPhxChannel = function (name, cb) {
      var type = 'video';
      members = resp.members; 
      for (let id in resp.members){
+
+       var peers = self.webrtc.getPeers(id, type);
+       console.log('id:', id);
+       console.log('peers in join:', peers);
+
        let id_str =  id.toString();
        var peer = self.webrtc.createPeer({
           id: id_str,
