@@ -445,23 +445,29 @@ SimpleWebRTC.prototype.joinPhxChannel = function (name, cb) {
      members = resp.members; 
      for (let id in resp.members){
 
-       var peers = self.webrtc.getPeers(id, type);
-       console.log('id:', id);
-       console.log('peers in join:', peers);
+      var peers = self.webrtc.getPeers(id, type);
+      var peer;
 
-       let id_str =  id.toString();
-       var peer = self.webrtc.createPeer({
-          id: id_str,
-          type: type,
-          enableDataChannels: self.config.enableDataChannels && type !== 'screen',
-          receiveMedia: {
-              offerToReceiveAudio: type !== 'screen' && self.config.receiveMedia.offerToReceiveAudio ? 1 : 0,
-              offerToReceiveVideo: self.config.receiveMedia.offerToReceiveVideo
-          }
-      });
-      self.emit('createdPeer', peer);
-      console.log('peer created on join:', peer);
-      peer.start();
+      if (peers.length) {
+        peers.forEach(function (p) {
+            if (p.id == id) peer = p;
+        }); 
+      }
+
+      if (!peer) {
+        let id_str =  id.toString();
+        peer = self.webrtc.createPeer({
+            id: id_str,
+            type: type,
+            enableDataChannels: self.config.enableDataChannels && type !== 'screen',
+            receiveMedia: {
+                offerToReceiveAudio: type !== 'screen' && self.config.receiveMedia.offerToReceiveAudio ? 1 : 0,
+                offerToReceiveVideo: self.config.receiveMedia.offerToReceiveVideo
+            }
+        });
+        self.emit('createdPeer', peer);
+        peer.start();
+      }
      }
 
      if (cb) cb(null, members);
