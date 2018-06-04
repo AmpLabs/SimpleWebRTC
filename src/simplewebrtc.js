@@ -118,20 +118,16 @@ function SimpleWebRTC(opts) {
               }
               peer.handleMessage(message);
           } else if (peers.length) {
-              console.log('got peers'); 
-
+  
               peers.forEach(function (peer) {
                   if (message.sid) {
-                      console.log('got msg sid');
-
+  
                       if (peer.sid === message.sid) {
-                          console.log('got msg sid pid match');
-
+  
                           peer.handleMessage(message);
                       }
                   } else {
-                      console.log('got no msg sid');
-
+  
                       peer.handleMessage(message);
                   }
               });
@@ -330,7 +326,7 @@ SimpleWebRTC.prototype.handlePeerStreamAdded = function (peer) {
     var self = this;
     var container = this.getRemoteVideoContainer();
     var video = attachMediaStream(peer.stream);
-
+    console.log('handlePeerStreamAdded', peer);
     // store video element as part of peer for easy removal
     peer.videoEl = video;
     video.id = this.getDomId(peer);
@@ -386,7 +382,9 @@ SimpleWebRTC.prototype.joinPhxChannel = function (name, cb) {
   
       var peers = self.webrtc.getPeers(message.from, message.roomType);
       var peer;
-      
+      console.log('phx_message:', message);
+      console.log('peers:', peers);
+
       if (message.type === 'offer') {
           if (peers.length) {
               peers.forEach(function (p) {
@@ -457,6 +455,7 @@ SimpleWebRTC.prototype.joinPhxChannel = function (name, cb) {
           }
       });
       self.emit('createdPeer', peer);
+      console.log('peer created on join:', peer);
       peer.start();
      }
 
@@ -520,7 +519,6 @@ SimpleWebRTC.prototype.startLocalVideo = function () {
     
     this.webrtc.start(this.config.media, function (err, stream) {
         if (err) {
-            console.log('err', err);
             self.emit('localMediaError', err);
         } else {
             attachMediaStream(stream, self.getLocalVideoContainer(), self.config.localVideo);
@@ -589,7 +587,6 @@ SimpleWebRTC.prototype.stopScreenShare = function () {
 SimpleWebRTC.prototype.testReadiness = function () {
     var self = this;
     if (this.sessionReady) {
-        console.log('in sessionReady', this.connection);
         if (this.connection) {
           if (!this.config.media.video && !this.config.media.audio) {
               self.emit('readyToCall', self.connection.getSessionid());
